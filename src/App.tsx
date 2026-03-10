@@ -1,12 +1,15 @@
 import { useState } from 'react'
-import { Plus } from 'lucide-react'
+import { Plus, LogOut } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useGoalStore } from './store/useGoalStore'
+import { useAuthStore } from './store/useAuthStore'
 import { useRollover } from './hooks/useRollover'
+import { useUserGoals } from './hooks/useUserGoals'
 import { GoalList } from './components/GoalList'
 import { UpdateModal } from './components/UpdateModal'
 import { AddGoalForm } from './components/AddGoalForm'
 import { EditGoalForm } from './components/EditGoalForm'
+import { LoginDialog } from './components/LoginDialog'
 import type { Goal } from './types'
 
 type ModalMode = 'none' | 'add' | 'edit' | 'update'
@@ -14,9 +17,20 @@ type ModalMode = 'none' | 'add' | 'edit' | 'update'
 export default function App() {
   useRollover()
 
-  const { goals } = useGoalStore()
+  const currentUserId = useAuthStore((s) => s.currentUserId)
+  const { logout, users } = useAuthStore()
+  const currentUser = users.find((u) => u.id === currentUserId)
+
+  const { goals } = useUserGoals()
+  // Keep deleteGoal available via store for GoalList / other components
+  useGoalStore()
+
   const [modalMode, setModalMode] = useState<ModalMode>('none')
   const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null)
+
+  if (!currentUserId) {
+    return <LoginDialog />
+  }
 
   const openUpdate = (goal: Goal) => {
     setSelectedGoal(goal)
@@ -51,12 +65,24 @@ export default function App() {
               {goals.length} {goals.length === 1 ? 'habit' : 'habits'}
             </p>
           </div>
-          <button
-            onClick={openAdd}
-            className="flex items-center gap-1.5 bg-accent hover:bg-accent/80 text-white text-sm font-semibold px-3 py-2 rounded-xl transition-colors"
-          >
-            <Plus size={16} /> Add
-          </button>
+          <div className="flex items-center gap-3">
+            {currentUser && (
+              <span className="text-white/60 text-sm">{currentUser.name}</span>
+            )}
+            <button
+              onClick={logout}
+              title="Log out"
+              className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/60 hover:text-white transition-colors"
+            >
+              <LogOut size={16} />
+            </button>
+            <button
+              onClick={openAdd}
+              className="flex items-center gap-1.5 bg-accent hover:bg-accent/80 text-white text-sm font-semibold px-3 py-2 rounded-xl transition-colors"
+            >
+              <Plus size={16} /> Add
+            </button>
+          </div>
         </div>
       </header>
 

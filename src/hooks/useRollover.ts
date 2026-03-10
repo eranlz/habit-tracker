@@ -1,9 +1,11 @@
 import { useEffect } from 'react'
 import { useGoalStore } from '../store/useGoalStore'
+import { useUserGoals } from './useUserGoals'
 import { computeRollover } from '../lib/rollover'
 
 export function useRollover() {
-  const { goals, lastOpenedAt, applyRollover } = useGoalStore()
+  const { goals, lastOpenedAt } = useUserGoals()
+  const { applyRollover } = useGoalStore()
 
   useEffect(() => {
     const result = computeRollover(goals, lastOpenedAt)

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useGoalStore } from '../store/useGoalStore'
+import { NumericStepper } from './NumericStepper'
 import type { Goal, Frequency } from '../types'
 
 interface Props {
@@ -71,13 +72,7 @@ export function EditGoalForm({ goal, onClose }: Props) {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-sm font-medium text-white/70 mb-1.5">Target</label>
-              <input
-                type="number"
-                min="1"
-                value={target}
-                onChange={(e) => setTarget(Math.max(1, parseInt(e.target.value) || 1))}
-                className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-accent text-sm"
-              />
+              <NumericStepper value={target} onChange={setTarget} />
             </div>
             <div>
               <label className="block text-sm font-medium text-white/70 mb-1.5">Unit</label>

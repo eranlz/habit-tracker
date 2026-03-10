@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Minus, Plus, Check } from 'lucide-react'
 import type { ActiveGoal } from '../types'
 import { useGoalStore } from '../store/useGoalStore'
+import { useUserGoals } from '../hooks/useUserGoals'
 import { ProgressRing } from './ProgressRing'
 
 interface Props {
@@ -10,7 +11,8 @@ interface Props {
 }
 
 export function ActiveUpdatePanel({ goal, onClose }: Props) {
-  const { goals, incrementCount, setCount } = useGoalStore()
+  const { goals } = useUserGoals()
+  const { incrementCount, setCount } = useGoalStore()
   const live = (goals.find((g) => g.id === goal.id) as ActiveGoal | undefined) ?? goal
   const [inputValue, setInputValue] = useState(String(live.currentCount))
 
