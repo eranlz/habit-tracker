@@ -11,9 +11,10 @@ import { AddGoalForm } from './components/AddGoalForm'
 import { EditGoalForm } from './components/EditGoalForm'
 import { LoginDialog } from './components/LoginDialog'
 import { HelpCard } from './components/HelpCard'
+import { HistoryModal } from './components/HistoryModal'
 import type { Goal } from './types'
 
-type ModalMode = 'none' | 'add' | 'edit' | 'update' | 'help'
+type ModalMode = 'none' | 'add' | 'edit' | 'update' | 'help' | 'history'
 
 export default function App() {
   useRollover()
@@ -41,6 +42,11 @@ export default function App() {
   const openEdit = (goal: Goal) => {
     setSelectedGoal(goal)
     setModalMode('edit')
+  }
+
+  const openHistory = (goal: Goal) => {
+    setSelectedGoal(goal)
+    setModalMode('history')
   }
 
   const openAdd = () => {
@@ -102,6 +108,7 @@ export default function App() {
           goals={goals}
           onUpdate={openUpdate}
           onEdit={openEdit}
+          onHistory={openHistory}
           onAdd={openAdd}
         />
         <div className="flex justify-center mt-auto pb-safe pt-4">
@@ -109,9 +116,15 @@ export default function App() {
         </div>
       </main>
 
-      {/* Update modal (bottom sheet for active/passive updates) */}
+      {/* Update modal */}
       <UpdateModal
         goal={modalMode === 'update' ? selectedGoal : null}
+        onClose={closeModal}
+      />
+
+      {/* History modal */}
+      <HistoryModal
+        goal={modalMode === 'history' ? selectedGoal : null}
         onClose={closeModal}
       />
 

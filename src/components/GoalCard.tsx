@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Pencil, Trash2, ChevronRight } from 'lucide-react'
+import { Pencil, Trash2, ChevronRight, GripVertical, History } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { Goal } from '../types'
 import { deriveStatus, statusColors } from '../lib/statusUtils'
@@ -12,9 +12,11 @@ interface Props {
   goal: Goal
   onUpdate: (goal: Goal) => void
   onEdit: (goal: Goal) => void
+  onHistory: (goal: Goal) => void
+  dragHandleProps?: React.HTMLAttributes<HTMLElement>
 }
 
-export function GoalCard({ goal, onUpdate, onEdit }: Props) {
+export function GoalCard({ goal, onUpdate, onEdit, onHistory, dragHandleProps }: Props) {
   const { deleteGoal } = useGoalStore()
   const [confirmDelete, setConfirmDelete] = useState(false)
   const status = deriveStatus(goal)
@@ -22,14 +24,22 @@ export function GoalCard({ goal, onUpdate, onEdit }: Props) {
 
   return (
     <motion.div
-      layout
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.96 }}
-      className={`relative rounded-2xl border-l-4 p-4 ${colors.border} ${colors.bg} bg-card`}
+      className={`relative rounded-2xl border-l-4 pl-2 pr-4 py-4 ${colors.border} ${colors.bg} bg-card`}
     >
-      <div className="flex items-center gap-3">
-        {/* Leftmost: streak badge */}
+      <div className="flex items-center gap-0">
+        {/* Leftmost: drag handle */}
+        <button
+          {...dragHandleProps}
+          className="p-0 -mr-3 rounded-lg text-white/20 hover:text-white/50 cursor-grab active:cursor-grabbing touch-none flex-shrink-0"
+          aria-label="Drag to reorder"
+        >
+          <GripVertical size={30} />
+        </button>
+
+        {/* Streak badge */}
         <StreakBadge streak={goal.streak} />
 
         {/* Name, progress text, status */}
@@ -61,6 +71,13 @@ export function GoalCard({ goal, onUpdate, onEdit }: Props) {
         {/* Right: actions */}
         <div className="flex flex-col items-end gap-2 flex-shrink-0">
           <div className="flex items-center gap-1">
+            <button
+              onClick={() => onHistory(goal)}
+              className="p-1.5 rounded-lg text-white/40 hover:text-white/80 hover:bg-white/10 transition-colors"
+              aria-label="View history"
+            >
+              <History size={14} />
+            </button>
             <button
               onClick={() => onEdit(goal)}
               className="p-1.5 rounded-lg text-white/40 hover:text-white/80 hover:bg-white/10 transition-colors"

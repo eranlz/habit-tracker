@@ -20,6 +20,7 @@ interface GoalStore {
   addGoal: (draft: GoalDraft) => void
   updateGoal: (id: string, patch: Partial<Goal>) => void
   deleteGoal: (id: string) => void
+  reorderGoals: (goals: Goal[]) => void
   incrementCount: (id: string, delta: number) => void
   setCount: (id: string, value: number) => void
   markFailed: (id: string) => void
@@ -95,6 +96,12 @@ export const useGoalStore = create<GoalStore>()(
         return setUD(state, userId, {
           goals: ud.goals.map((g) => (g.id === id ? { ...g, ...patch } as Goal : g)),
         })
+      }),
+
+      reorderGoals: (goals) => set((state) => {
+        const userId = uid()
+        if (!userId) return {}
+        return setUD(state, userId, { goals })
       }),
 
       deleteGoal: (id) => set((state) => {
