@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus, LogOut } from 'lucide-react'
+import { Plus, LogOut, Info } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useGoalStore } from './store/useGoalStore'
 import { useAuthStore } from './store/useAuthStore'
@@ -10,9 +10,10 @@ import { UpdateModal } from './components/UpdateModal'
 import { AddGoalForm } from './components/AddGoalForm'
 import { EditGoalForm } from './components/EditGoalForm'
 import { LoginDialog } from './components/LoginDialog'
+import { HelpCard } from './components/HelpCard'
 import type { Goal } from './types'
 
-type ModalMode = 'none' | 'add' | 'edit' | 'update'
+type ModalMode = 'none' | 'add' | 'edit' | 'update' | 'help'
 
 export default function App() {
   useRollover()
@@ -52,7 +53,7 @@ export default function App() {
     setSelectedGoal(null)
   }
 
-  const isSheetOpen = modalMode === 'add' || modalMode === 'edit'
+  const isSheetOpen = modalMode === 'add' || modalMode === 'edit' || modalMode === 'help'
 
   return (
     <div className="min-h-screen bg-[#0f0f13]">
@@ -60,7 +61,16 @@ export default function App() {
       <header className="sticky top-0 z-30 bg-[#0f0f13]/90 backdrop-blur-md border-b border-white/5">
         <div className="max-w-lg mx-auto px-4 py-4 flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-bold text-white tracking-tight">Nexus</h1>
+            <div className="flex items-center gap-1.5">
+              <h1 className="text-2xl font-bold text-white tracking-tight">Nexus</h1>
+              <button
+                onClick={() => setModalMode('help')}
+                title="How it works"
+                className="p-1 text-white/30 hover:text-white/70 transition-colors ml-2"
+              >
+                <Info size={30} />
+              </button>
+            </div>
             <p className="text-xs text-white/40">
               {goals.length} {goals.length === 1 ? 'habit' : 'habits'}
             </p>
@@ -87,13 +97,16 @@ export default function App() {
       </header>
 
       {/* Goal list */}
-      <main className="max-w-lg mx-auto pt-4 pb-24">
+      <main className="max-w-lg mx-auto px-0 pt-4 flex flex-col" style={{ minHeight: 'calc(100dvh - 73px)' }}>
         <GoalList
           goals={goals}
           onUpdate={openUpdate}
           onEdit={openEdit}
           onAdd={openAdd}
         />
+        <div className="flex justify-center mt-auto pb-safe pt-4">
+          <img src="/polychrome.png" alt="Polychrome" className="h-12 opacity-30 pr-5" />
+        </div>
       </main>
 
       {/* Update modal (bottom sheet for active/passive updates) */}
@@ -102,7 +115,7 @@ export default function App() {
         onClose={closeModal}
       />
 
-      {/* Add / Edit bottom sheet */}
+      {/* Add / Edit / Help bottom sheet */}
       <AnimatePresence>
         {isSheetOpen && (
           <>
@@ -125,12 +138,14 @@ export default function App() {
               <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mt-3 mb-4" />
               <div className="px-5 pb-8">
                 <h2 className="text-lg font-bold text-white mb-4">
-                  {modalMode === 'add' ? 'New Habit' : 'Edit Habit'}
+                  {modalMode === 'add' ? 'New Habit' : modalMode === 'edit' ? 'Edit Habit' : 'How it works'}
                 </h2>
                 {modalMode === 'add' ? (
                   <AddGoalForm onClose={closeModal} />
-                ) : selectedGoal ? (
+                ) : modalMode === 'edit' && selectedGoal ? (
                   <EditGoalForm goal={selectedGoal} onClose={closeModal} />
+                ) : modalMode === 'help' ? (
+                  <HelpCard />
                 ) : null}
               </div>
             </motion.div>

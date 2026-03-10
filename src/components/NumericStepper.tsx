@@ -27,7 +27,7 @@ export function NumericStepper({ value, min = 1, max = 9999, onChange }: Props) 
 
   return (
     <div
-      className="flex items-center bg-white/10 border border-white/20 rounded-xl overflow-hidden"
+      className="flex items-center h-[46px] bg-white/10 border border-white/20 rounded-xl overflow-hidden"
       onWheel={handleWheel}
     >
       <button

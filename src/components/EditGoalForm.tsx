@@ -80,7 +80,7 @@ export function EditGoalForm({ goal, onClose }: Props) {
                 type="text"
                 value={unit}
                 onChange={(e) => setUnit(e.target.value)}
-                className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-accent text-sm"
+                className="w-full h-[46px] bg-white/10 border border-white/20 rounded-xl px-4 text-white focus:outline-none focus:border-accent text-sm"
               />
             </div>
           </div>

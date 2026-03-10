@@ -32,20 +32,20 @@ export function GoalCard({ goal, onUpdate, onEdit }: Props) {
         {/* Leftmost: streak badge */}
         <StreakBadge streak={goal.streak} />
 
-        {/* Progress ring (active only) */}
-        {goal.type === 'active' && (
-          <div className="flex-shrink-0 flex items-center justify-center relative" style={{ width: 48, height: 48 }}>
-            <ProgressRing current={goal.currentCount} target={goal.target} size={48} strokeWidth={4} />
-            <span className="absolute text-[10px] font-bold text-white">
-              {Math.round(goal.currentCount >= goal.target ? 100 : (goal.currentCount / goal.target) * 100)}%
-            </span>
-          </div>
-        )}
-
         {/* Name, progress text, status */}
         <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-white text-base leading-tight">{goal.name}</h3>
-
+          <div className="flex items-center gap-2">
+            {/* Progress ring (active only) — left-aligned with name */}
+            {goal.type === 'active' && (
+              <div className="flex-shrink-0 relative" style={{ width: 36, height: 36 }}>
+                <ProgressRing current={goal.currentCount} target={goal.target} size={36} strokeWidth={3} />
+                <span className="absolute inset-0 flex items-center justify-center text-[9px] font-bold text-white">
+                  {Math.round(goal.currentCount >= goal.target ? 100 : (goal.currentCount / goal.target) * 100)}%
+                </span>
+              </div>
+            )}
+            <h3 className="font-semibold text-white text-base leading-tight">{goal.name}</h3>
+          </div>
           {goal.type === 'active' && (
             <p className="text-sm text-white/60 mt-0.5">
               {goal.currentCount} / {goal.target} {goal.unit}
@@ -79,7 +79,7 @@ export function GoalCard({ goal, onUpdate, onEdit }: Props) {
 
           <button
             onClick={() => onUpdate(goal)}
-            className="flex items-center gap-1 text-xs font-semibold bg-accent hover:bg-accent/80 text-white px-3 py-1.5 rounded-lg transition-colors"
+            className={`flex items-center gap-1 text-xs font-semibold border px-3 py-1.5 rounded-lg transition-colors hover:bg-white/10 ${colors.text} ${colors.border}`}
           >
             Update <ChevronRight size={13} />
           </button>

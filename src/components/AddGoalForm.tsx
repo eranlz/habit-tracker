@@ -100,7 +100,7 @@ export function AddGoalForm({ onClose }: Props) {
                 value={unit}
                 onChange={(e) => setUnit(e.target.value)}
                 placeholder="e.g. km, pages"
-                className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-accent text-sm"
+                className="w-full h-[46px] bg-white/10 border border-white/20 rounded-xl px-4 text-white placeholder-white/30 focus:outline-none focus:border-accent text-sm"
               />
             </div>
           </div>
