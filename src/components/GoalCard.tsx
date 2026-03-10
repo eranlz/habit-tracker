@@ -1,0 +1,117 @@
+import { useState } from 'react'
+import { Pencil, Trash2, ChevronRight } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import type { Goal } from '../types'
+import { deriveStatus, statusColors } from '../lib/statusUtils'
+import { useGoalStore } from '../store/useGoalStore'
+import { StreakBadge } from './StreakBadge'
+import { StatusPill } from './StatusPill'
+import { ProgressRing } from './ProgressRing'
+
+interface Props {
+  goal: Goal
+  onUpdate: (goal: Goal) => void
+  onEdit: (goal: Goal) => void
+}
+
+export function GoalCard({ goal, onUpdate, onEdit }: Props) {
+  const { deleteGoal } = useGoalStore()
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const status = deriveStatus(goal)
+  const colors = statusColors[status]
+
+  return (
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.96 }}
+      className={`relative rounded-2xl border-l-4 p-4 ${colors.border} ${colors.bg} bg-card`}
+    >
+      <div className="flex items-center gap-3">
+        {/* Leftmost: streak badge */}
+        <StreakBadge streak={goal.streak} />
+
+        {/* Progress ring (active only) */}
+        {goal.type === 'active' && (
+          <div className="flex-shrink-0 flex items-center justify-center relative" style={{ width: 48, height: 48 }}>
+            <ProgressRing current={goal.currentCount} target={goal.target} size={48} strokeWidth={4} />
+            <span className="absolute text-[10px] font-bold text-white">
+              {Math.round(goal.currentCount >= goal.target ? 100 : (goal.currentCount / goal.target) * 100)}%
+            </span>
+          </div>
+        )}
+
+        {/* Name, progress text, status */}
+        <div className="flex-1 min-w-0">
+          <h3 className="font-semibold text-white text-base leading-tight">{goal.name}</h3>
+
+          {goal.type === 'active' && (
+            <p className="text-sm text-white/60 mt-0.5">
+              {goal.currentCount} / {goal.target} {goal.unit}
+              {goal.frequency === 'weekly' && <span className="ml-1 text-white/40">(weekly)</span>}
+            </p>
+          )}
+
+          <div className="mt-1.5 flex items-center gap-2">
+            <StatusPill status={status} />
+          </div>
+        </div>
+
+        {/* Right: actions */}
+        <div className="flex flex-col items-end gap-2 flex-shrink-0">
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => onEdit(goal)}
+              className="p-1.5 rounded-lg text-white/40 hover:text-white/80 hover:bg-white/10 transition-colors"
+              aria-label="Edit goal"
+            >
+              <Pencil size={14} />
+            </button>
+            <button
+              onClick={() => setConfirmDelete(true)}
+              className="p-1.5 rounded-lg text-white/40 hover:text-danger hover:bg-danger/10 transition-colors"
+              aria-label="Delete goal"
+            >
+              <Trash2 size={14} />
+            </button>
+          </div>
+
+          <button
+            onClick={() => onUpdate(goal)}
+            className="flex items-center gap-1 text-xs font-semibold bg-accent hover:bg-accent/80 text-white px-3 py-1.5 rounded-lg transition-colors"
+          >
+            Update <ChevronRight size={13} />
+          </button>
+        </div>
+      </div>
+
+      <AnimatePresence>
+        {confirmDelete && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            className="absolute inset-x-0 bottom-0 rounded-b-2xl bg-card border-t border-white/10 px-4 py-3 flex items-center justify-between"
+          >
+            <p className="text-sm text-white/80">Delete this habit?</p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setConfirmDelete(false)}
+                className="text-xs px-3 py-1.5 rounded-lg bg-white/10 text-white/70 hover:bg-white/20 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => deleteGoal(goal.id)}
+                className="text-xs px-3 py-1.5 rounded-lg bg-danger text-white hover:bg-danger/80 transition-colors"
+              >
+                Delete
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  )
+}
