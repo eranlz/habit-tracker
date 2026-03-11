@@ -21,6 +21,7 @@ interface GoalStore {
   updateGoal: (id: string, patch: Partial<Goal>) => void
   deleteGoal: (id: string) => void
   reorderGoals: (goals: Goal[]) => void
+  importGoals: (goals: Goal[]) => void
   incrementCount: (id: string, delta: number) => void
   setCount: (id: string, value: number) => void
   markFailed: (id: string) => void
@@ -99,6 +100,12 @@ export const useGoalStore = create<GoalStore>()(
       }),
 
       reorderGoals: (goals) => set((state) => {
+        const userId = uid()
+        if (!userId) return {}
+        return setUD(state, userId, { goals })
+      }),
+
+      importGoals: (goals) => set((state) => {
         const userId = uid()
         if (!userId) return {}
         return setUD(state, userId, { goals })

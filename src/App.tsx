@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus, LogOut, Info } from 'lucide-react'
+import { Plus, MoreHorizontal } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useGoalStore } from './store/useGoalStore'
 import { useAuthStore } from './store/useAuthStore'
@@ -12,15 +12,16 @@ import { EditGoalForm } from './components/EditGoalForm'
 import { LoginDialog } from './components/LoginDialog'
 import { HelpCard } from './components/HelpCard'
 import { HistoryModal } from './components/HistoryModal'
+import { MenuSheet } from './components/MenuSheet'
 import type { Goal } from './types'
 
-type ModalMode = 'none' | 'add' | 'edit' | 'update' | 'help' | 'history'
+type ModalMode = 'none' | 'add' | 'edit' | 'update' | 'help' | 'history' | 'menu'
 
 export default function App() {
   useRollover()
 
   const currentUserId = useAuthStore((s) => s.currentUserId)
-  const { logout, users } = useAuthStore()
+  const { users } = useAuthStore()
   const currentUser = users.find((u) => u.id === currentUserId)
 
   const { goals } = useUserGoals()
@@ -60,6 +61,7 @@ export default function App() {
   }
 
   const isSheetOpen = modalMode === 'add' || modalMode === 'edit' || modalMode === 'help'
+  const userName = currentUser?.name ?? ''
 
   return (
     <div className="min-h-screen bg-[#0f0f13]">
@@ -67,30 +69,18 @@ export default function App() {
       <header className="sticky top-0 z-30 bg-[#0f0f13]/90 backdrop-blur-md border-b border-white/5">
         <div className="max-w-lg mx-auto px-4 py-4 flex items-center justify-between">
           <div>
-            <div className="flex items-center gap-1.5">
-              <h1 className="text-2xl font-bold text-white tracking-tight">Nexus</h1>
-              <button
-                onClick={() => setModalMode('help')}
-                title="How it works"
-                className="p-1 text-white/30 hover:text-white/70 transition-colors ml-2"
-              >
-                <Info size={30} />
-              </button>
-            </div>
+            <h1 className="text-2xl font-bold text-white tracking-tight">Nexus</h1>
             <p className="text-xs text-white/40">
               {goals.length} {goals.length === 1 ? 'habit' : 'habits'}
             </p>
           </div>
-          <div className="flex items-center gap-3">
-            {currentUser && (
-              <span className="text-white/60 text-sm">{currentUser.name}</span>
-            )}
+          <div className="flex items-center gap-2">
             <button
-              onClick={logout}
-              title="Log out"
+              onClick={() => setModalMode('menu')}
+              title="Menu"
               className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/60 hover:text-white transition-colors"
             >
-              <LogOut size={16} />
+              <MoreHorizontal size={18} />
             </button>
             <button
               onClick={openAdd}
@@ -126,6 +116,15 @@ export default function App() {
       <HistoryModal
         goal={modalMode === 'history' ? selectedGoal : null}
         onClose={closeModal}
+      />
+
+      {/* Menu sheet */}
+      <MenuSheet
+        isOpen={modalMode === 'menu'}
+        userName={userName}
+        currentGoalCount={goals.length}
+        onClose={closeModal}
+        onHelp={() => setModalMode('help')}
       />
 
       {/* Add / Edit / Help bottom sheet */}
