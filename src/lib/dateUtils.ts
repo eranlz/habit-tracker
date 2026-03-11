@@ -1,13 +1,17 @@
-import { format, getISOWeek, getISOWeekYear } from 'date-fns'
+import { format, startOfWeek } from 'date-fns'
 
 export function dayKey(date: Date = new Date()): string {
   return format(date, 'yyyy-MM-dd')
 }
 
+/** Returns the Date object for the Sunday that starts the week containing `date`. */
+export function startOfSundayWeek(date: Date = new Date()): Date {
+  return startOfWeek(date, { weekStartsOn: 0 })
+}
+
+/** Returns the ISO date string of the Sunday that starts the week containing `date`. */
 export function weekKey(date: Date = new Date()): string {
-  const week = getISOWeek(date)
-  const year = getISOWeekYear(date)
-  return `${year}-W${String(week).padStart(2, '0')}`
+  return format(startOfSundayWeek(date), 'yyyy-MM-dd')
 }
 
 export function periodKey(frequency: 'daily' | 'weekly', date: Date = new Date()): string {

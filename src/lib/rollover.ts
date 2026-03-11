@@ -13,24 +13,23 @@ function capHistory(history: HistoryEntry[]): HistoryEntry[] {
 function rolloverActive(goal: ActiveGoal, _lastOpened: Date, today: Date): ActiveGoal {
   if (goal.frequency === 'weekly') {
     const todayWeek = weekKey(today)
-    if (goal.currentPeriodKey === todayWeek) return goal
 
-    const newHistory = capHistory([
-      ...goal.history,
-      {
-        periodKey: goal.currentPeriodKey,
-        count: goal.currentCount,
-        succeeded: goal.currentCount >= goal.target,
-      },
-    ])
-
-    const updated = { ...goal, history: newHistory }
-    return {
-      ...updated,
-      currentCount: 0,
-      currentPeriodKey: todayWeek,
-      streak: calculateStreak(updated),
+    if (goal.currentPeriodKey !== todayWeek) {
+      // New week — commit the current period and reset
+      const newHistory = capHistory([
+        ...goal.history,
+        {
+          periodKey: goal.currentPeriodKey,
+          count: goal.currentCount,
+          succeeded: goal.currentCount >= goal.target,
+        },
+      ])
+      const updated = { ...goal, history: newHistory, currentCount: 0, currentPeriodKey: todayWeek }
+      return { ...updated, streak: calculateStreak(updated, today) }
     }
+
+    // Same week — the streak can still change day-to-day, so refresh it
+    return { ...goal, streak: calculateStreak(goal, today) }
   }
 
   // Daily

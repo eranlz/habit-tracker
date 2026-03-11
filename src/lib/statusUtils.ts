@@ -1,9 +1,22 @@
 import type { Goal } from '../types'
+import { addDays, daysBetween, startOfSundayWeek } from './dateUtils'
+import { startOfDay } from 'date-fns'
 
 export type GoalStatus = 'success' | 'in-progress' | 'pending' | 'failed'
 
-export function deriveStatus(goal: Goal): GoalStatus {
+export function deriveStatus(goal: Goal, now: Date = new Date()): GoalStatus {
   if (goal.type === 'passive') return goal.isFailed ? 'failed' : 'success'
+
+  if (goal.type === 'active' && goal.frequency === 'weekly') {
+    if (goal.currentCount >= goal.target) return 'success'
+    const today = startOfDay(now)
+    const currentWeekSunday = startOfSundayWeek(today)
+    const daysRemaining = daysBetween(today, addDays(currentWeekSunday, 7))
+    if (goal.currentCount + daysRemaining < goal.target) return 'failed'
+    if (goal.currentCount > 0) return 'in-progress'
+    return 'pending'
+  }
+
   if (goal.currentCount >= goal.target) return 'success'
   if (goal.currentCount > 0) return 'in-progress'
   return 'pending'
