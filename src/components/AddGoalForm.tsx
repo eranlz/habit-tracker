@@ -10,6 +10,7 @@ interface Props {
 export function AddGoalForm({ onClose }: Props) {
   const { addGoal } = useGoalStore()
   const [name, setName] = useState('')
+  const [details, setDetails] = useState('')
   const [type, setType] = useState<GoalType>('active')
   const [frequency, setFrequency] = useState<Frequency>('daily')
   const [target, setTarget] = useState(1)
@@ -20,9 +21,9 @@ export function AddGoalForm({ onClose }: Props) {
     if (!name.trim()) return
 
     if (type === 'active') {
-      addGoal({ type: 'active', name: name.trim(), frequency, target, unit })
+      addGoal({ type: 'active', name: name.trim(), frequency, target, unit, details: details.trim() || undefined })
     } else {
-      addGoal({ type: 'passive', name: name.trim(), frequency: 'daily' })
+      addGoal({ type: 'passive', name: name.trim(), frequency: 'daily', details: details.trim() || undefined })
     }
     onClose()
   }
@@ -38,6 +39,16 @@ export function AddGoalForm({ onClose }: Props) {
           placeholder="e.g. Morning run"
           className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-accent text-sm"
           autoFocus
+        />
+      </div>
+
+      <div>
+        <textarea
+          value={details}
+          onChange={(e) => setDetails(e.target.value)}
+          placeholder="Details (optional)"
+          rows={2}
+          className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-accent text-sm resize-none"
         />
       </div>
 

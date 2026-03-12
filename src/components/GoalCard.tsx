@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Pencil, Trash2, ChevronRight, GripVertical, History } from 'lucide-react'
+import { Pencil, Trash2, ChevronRight, GripVertical, History, Info } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { Goal } from '../types'
 import { deriveStatus, statusColors } from '../lib/statusUtils'
@@ -19,6 +19,7 @@ interface Props {
 export function GoalCard({ goal, onUpdate, onEdit, onHistory, dragHandleProps }: Props) {
   const { deleteGoal } = useGoalStore()
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [showDetails, setShowDetails] = useState(false)
   const status = deriveStatus(goal)
   const colors = statusColors[status]
 
@@ -71,6 +72,15 @@ export function GoalCard({ goal, onUpdate, onEdit, onHistory, dragHandleProps }:
         {/* Right: actions */}
         <div className="flex flex-col items-end gap-2 flex-shrink-0">
           <div className="flex items-center gap-1">
+            {goal.details && (
+              <button
+                onClick={() => setShowDetails((v) => !v)}
+                className="p-1.5 rounded-lg text-white/40 hover:text-white/80 hover:bg-white/10 transition-colors"
+                aria-label="Show details"
+              >
+                <Info size={14} />
+              </button>
+            )}
             <button
               onClick={() => onHistory(goal)}
               className="p-1.5 rounded-lg text-white/40 hover:text-white/80 hover:bg-white/10 transition-colors"
@@ -104,6 +114,23 @@ export function GoalCard({ goal, onUpdate, onEdit, onHistory, dragHandleProps }:
       </div>
 
       <AnimatePresence>
+        {showDetails && goal.details && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            className="absolute inset-x-0 bottom-0 rounded-b-2xl bg-card border-t border-white/10 px-4 py-3 flex items-start justify-between gap-3"
+          >
+            <p className="text-sm text-white/70 leading-snug">{goal.details}</p>
+            <button
+              onClick={() => setShowDetails(false)}
+              className="flex-shrink-0 text-xs text-white/40 hover:text-white/70 transition-colors mt-0.5"
+              aria-label="Close details"
+            >
+              ✕
+            </button>
+          </motion.div>
+        )}
         {confirmDelete && (
           <motion.div
             initial={{ opacity: 0, y: -8 }}

@@ -10,6 +10,7 @@ export interface HistoryEntry {
 export interface BaseGoal {
   id: string;
   name: string;
+  details?: string;
   type: GoalType;
   createdAt: string;
   streak: number;
