@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { Pencil, Trash2, ChevronRight, GripVertical, History, Info } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { parseISO } from 'date-fns'
 import type { Goal } from '../types'
 import { deriveStatus, statusColors } from '../lib/statusUtils'
 import { useGoalStore } from '../store/useGoalStore'
+import { dayKey, addDays } from '../lib/dateUtils'
 import { StreakBadge } from './StreakBadge'
 import { StatusPill } from './StatusPill'
 import { ProgressRing } from './ProgressRing'
@@ -63,6 +65,26 @@ export function GoalCard({ goal, onUpdate, onEdit, onHistory, dragHandleProps }:
               {goal.frequency === 'weekly' && <span className="ml-1 text-white/40">(weekly)</span>}
             </p>
           )}
+
+          {goal.type === 'active' && goal.frequency === 'weekly' && (() => {
+            const DAY_LABELS = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
+            const weekStart = parseISO(goal.currentPeriodKey)
+            const logged = new Set(goal.activeDaysInPeriod ?? [])
+            return (
+              <div className="flex gap-1 mt-1">
+                {DAY_LABELS.map((label, i) => {
+                  const dk = dayKey(addDays(weekStart, i))
+                  const filled = logged.has(dk)
+                  return (
+                    <div key={i} className="flex flex-col items-center gap-0.5">
+                      <div className={`w-4 h-4 rounded-sm ${filled ? 'bg-accent' : 'bg-white/10'}`} />
+                      <span className="text-[9px] text-white/30">{label}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            )
+          })()}
 
           <div className="mt-1.5 flex items-center gap-2">
             <StatusPill status={status} />

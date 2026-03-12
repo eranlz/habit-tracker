@@ -73,6 +73,7 @@ export const useGoalStore = create<GoalStore>()(
             history: [],
             currentCount: 0,
             currentPeriodKey: periodKey(draft.frequency, now),
+            activeDaysInPeriod: draft.frequency === 'weekly' ? [] : undefined,
           } as ActiveGoal
         } else {
           goal = {
@@ -124,11 +125,28 @@ export const useGoalStore = create<GoalStore>()(
         const userId = uid()
         if (!userId) return {}
         const ud = getUD(state, userId)
+        const today = dayKey()
         return setUD(state, userId, {
           goals: ud.goals.map((g) => {
             if (g.id !== id || g.type !== 'active') return g
-            const newCount = Math.max(0, g.currentCount + delta)
-            return { ...g, currentCount: newCount }
+
+            if (g.frequency === 'weekly') {
+              const days = g.activeDaysInPeriod ?? []
+              const todayLogged = days.includes(today)
+              if (delta > 0) {
+                if (todayLogged) return g
+                return { ...g, currentCount: g.currentCount + 1, activeDaysInPeriod: [...days, today] }
+              } else {
+                if (!todayLogged) return g
+                return {
+                  ...g,
+                  currentCount: Math.max(0, g.currentCount - 1),
+                  activeDaysInPeriod: days.filter((d) => d !== today),
+                }
+              }
+            }
+
+            return { ...g, currentCount: Math.max(0, g.currentCount + delta) }
           }),
         })
       }),

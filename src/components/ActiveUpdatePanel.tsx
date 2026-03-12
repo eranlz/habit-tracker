@@ -3,6 +3,7 @@ import { Minus, Plus, Check } from 'lucide-react'
 import type { ActiveGoal } from '../types'
 import { useGoalStore } from '../store/useGoalStore'
 import { useUserGoals } from '../hooks/useUserGoals'
+import { dayKey } from '../lib/dateUtils'
 import { ProgressRing } from './ProgressRing'
 
 interface Props {
@@ -38,6 +39,10 @@ export function ActiveUpdatePanel({ goal, onClose }: Props) {
 
   const progress = live.target > 0 ? Math.min(live.currentCount / live.target, 1) : 0
   const isComplete = live.currentCount >= live.target
+  const todayKey = dayKey()
+  const todayLogged = live.frequency === 'weekly'
+    ? (live.activeDaysInPeriod ?? []).includes(todayKey)
+    : false
 
   return (
     <div className="flex flex-col items-center gap-6">
@@ -62,24 +67,28 @@ export function ActiveUpdatePanel({ goal, onClose }: Props) {
       <div className="flex items-center gap-4">
         <button
           onClick={() => handleIncrement(-1)}
-          disabled={live.currentCount <= 0}
+          disabled={live.currentCount <= 0 || (live.frequency === 'weekly' && !todayLogged)}
           className="w-12 h-12 rounded-2xl bg-white/10 hover:bg-white/20 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center text-white transition-colors"
         >
           <Minus size={20} />
         </button>
 
-        <input
-          type="number"
-          min="0"
-          value={inputValue}
-          onChange={handleInputChange}
-          onBlur={handleInputBlur}
-          className="w-20 text-center text-2xl font-bold text-white bg-white/10 rounded-xl py-2 border border-white/20 focus:outline-none focus:border-accent"
-        />
+        {live.frequency !== 'weekly' ? (
+          <input
+            type="number"
+            min="0"
+            value={inputValue}
+            onChange={handleInputChange}
+            onBlur={handleInputBlur}
+            className="w-20 text-center text-2xl font-bold text-white bg-white/10 rounded-xl py-2 border border-white/20 focus:outline-none focus:border-accent"
+          />
+        ) : (
+          <span className="w-20 text-center text-2xl font-bold text-white">{live.currentCount}</span>
+        )}
 
         <button
           onClick={() => handleIncrement(1)}
-          disabled={live.currentCount >= live.target}
+          disabled={isComplete || (live.frequency === 'weekly' && todayLogged)}
           className="w-12 h-12 rounded-2xl bg-accent hover:bg-accent/80 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center text-white transition-colors"
         >
           <Plus size={20} />

@@ -24,7 +24,7 @@ function rolloverActive(goal: ActiveGoal, _lastOpened: Date, today: Date): Activ
           succeeded: goal.currentCount >= goal.target,
         },
       ])
-      const updated = { ...goal, history: newHistory, currentCount: 0, currentPeriodKey: todayWeek }
+      const updated = { ...goal, history: newHistory, currentCount: 0, currentPeriodKey: todayWeek, activeDaysInPeriod: [] }
       return { ...updated, streak: calculateStreak(updated, today) }
     }
 

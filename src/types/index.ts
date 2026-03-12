@@ -24,6 +24,7 @@ export interface ActiveGoal extends BaseGoal {
   unit: string;
   currentCount: number;
   currentPeriodKey: string;
+  activeDaysInPeriod?: string[];
 }
 
 export interface PassiveGoal extends BaseGoal {
