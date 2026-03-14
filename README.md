@@ -1,4 +1,4 @@
-# Nexus — Habit Tracker
+# Rythm — Habit Tracker
 
 A local-first PWA habit tracker by [Polychrome](https://polychrome.io). No backend, no account sync — all data lives in your browser's localStorage.
 
