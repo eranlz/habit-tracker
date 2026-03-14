@@ -31,6 +31,22 @@ export default function App() {
   const [modalMode, setModalMode] = useState<ModalMode>('none')
   const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null)
 
+  // Token gate (outermost layer — checked after hooks to satisfy Rules of Hooks)
+  const secret = import.meta.env.VITE_AUTH_TOKEN as string | undefined
+  if (!secret) return null
+
+  const params = new URLSearchParams(window.location.search)
+  const urlToken = params.get('token')
+
+  if (urlToken === secret) {
+    localStorage.setItem('token-authed', '1')
+    params.delete('token')
+    const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '')
+    window.history.replaceState(null, '', newUrl)
+  } else if (!localStorage.getItem('token-authed')) {
+    return null
+  }
+
   if (!currentUserId) {
     return <LoginDialog />
   }
