@@ -7,24 +7,26 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icons/*.png', 'icons/*.svg'],
+      includeAssets: ['icons/*.png', 'icons/*.svg', 'icons/apple-touch-icon.png'],
       manifest: {
-        name: 'Nexus Habit Tracker',
-        short_name: 'Nexus',
-        description: 'Track your habits with Nexus',
+        name: 'Rhythm Habit Tracker',
+        short_name: 'Rhythm',
+        description: 'Track your habits with Rhythm',
         theme_color: '#0f0f13',
         background_color: '#0f0f13',
         display: 'standalone',
         icons: [
           {
-            src: '/icons/icon-192.png',
+            src: 'icons/icon-192.png',
             sizes: '192x192',
             type: 'image/png',
+            purpose: 'any',
           },
           {
-            src: '/icons/icon-512.png',
+            src: 'icons/icon-512.png',
             sizes: '512x512',
             type: 'image/png',
+            purpose: 'any maskable',
           },
         ],
       },

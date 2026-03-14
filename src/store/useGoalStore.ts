@@ -198,6 +198,6 @@ export const useGoalStore = create<GoalStore>()(
         })
       }),
     }),
-    { name: 'nexus-goals-v1' }
+    { name: 'rhythm-goals-v1' }
   )
 )

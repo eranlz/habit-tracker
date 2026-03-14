@@ -45,7 +45,7 @@ export function LoginDialog() {
     <div className="fixed inset-0 bg-[#0f0f13] z-50 flex items-center justify-center px-4">
       <div className="w-full max-w-sm bg-card border border-white/10 rounded-2xl p-8 flex flex-col gap-6">
         <div className="text-center">
-<h1 className="text-2xl font-bold text-white tracking-tight">Nexus</h1>
+<h1 className="text-2xl font-bold text-white tracking-tight">Rhythm</h1>
           <p className="text-white/40 text-sm mt-1">Your personal habit tracker</p>
         </div>
 

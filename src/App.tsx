@@ -69,7 +69,7 @@ export default function App() {
       <header className="sticky top-0 z-30 bg-[#0f0f13]/90 backdrop-blur-md border-b border-white/5">
         <div className="max-w-lg mx-auto px-4 py-4 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-white tracking-tight">Nexus</h1>
+            <h1 className="text-2xl font-bold text-white tracking-tight">Rhythm</h1>
             <p className="text-xs text-white/40">
               {goals.length} {goals.length === 1 ? 'habit' : 'habits'}
             </p>

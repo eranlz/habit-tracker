@@ -72,6 +72,6 @@ export const useAuthStore = create<AuthStore>()(
 
       logout: () => set({ currentUserId: null }),
     }),
-    { name: 'nexus-auth-v1' }
+    { name: 'rhythm-auth-v1' }
   )
 )
