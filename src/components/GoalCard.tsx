@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Pencil, Trash2, ChevronRight, GripVertical, History, Info } from 'lucide-react'
+import { useState, useRef, useEffect } from 'react'
+import { Pencil, Trash2, ChevronRight, GripVertical, History, Info, MoreHorizontal } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { parseISO } from 'date-fns'
 import type { Goal } from '../types'
@@ -22,8 +22,21 @@ export function GoalCard({ goal, onUpdate, onEdit, onHistory, dragHandleProps }:
   const { deleteGoal } = useGoalStore()
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [showDetails, setShowDetails] = useState(false)
+  const [showMenu, setShowMenu] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
   const status = deriveStatus(goal)
   const colors = statusColors[status]
+
+  useEffect(() => {
+    if (!showMenu) return
+    function handleClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setShowMenu(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [showMenu])
 
   return (
     <motion.div
@@ -32,7 +45,56 @@ export function GoalCard({ goal, onUpdate, onEdit, onHistory, dragHandleProps }:
       exit={{ opacity: 0, scale: 0.96 }}
       className={`relative rounded-2xl border-l-4 pl-2 pr-4 py-4 ${colors.border} ${colors.bg} bg-card`}
     >
-      <div className="flex items-center gap-0">
+      {/* Top-right: ... menu */}
+      <div ref={menuRef} className="absolute top-2 right-2 z-10">
+        <button
+          onClick={() => setShowMenu((v) => !v)}
+          className="p-1.5 rounded-lg text-white/30 hover:text-white/80 hover:bg-white/10 transition-colors"
+          aria-label="More options"
+        >
+          <MoreHorizontal size={16} />
+        </button>
+        <AnimatePresence>
+          {showMenu && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: -4 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: -4 }}
+              transition={{ duration: 0.1 }}
+              className="absolute right-0 top-full mt-1 z-20 min-w-[140px] rounded-xl bg-surface border border-white/10 shadow-xl overflow-hidden"
+            >
+              {goal.details && (
+                <button
+                  onClick={() => { setShowDetails((v) => !v); setShowMenu(false) }}
+                  className="flex items-center gap-2 w-full px-3 py-2 text-sm text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+                >
+                  <Info size={14} /> Details
+                </button>
+              )}
+              <button
+                onClick={() => { onHistory(goal); setShowMenu(false) }}
+                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+              >
+                <History size={14} /> History
+              </button>
+              <button
+                onClick={() => { onEdit(goal); setShowMenu(false) }}
+                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+              >
+                <Pencil size={14} /> Edit
+              </button>
+              <button
+                onClick={() => { setConfirmDelete(true); setShowMenu(false) }}
+                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-danger hover:bg-danger/10 transition-colors"
+              >
+                <Trash2 size={14} /> Delete
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      <div className="flex items-stretch gap-0">
         {/* Leftmost: drag handle */}
         <button
           {...dragHandleProps}
@@ -48,89 +110,51 @@ export function GoalCard({ goal, onUpdate, onEdit, onHistory, dragHandleProps }:
         {/* Name, progress text, status */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            {/* Progress ring (active only) — left-aligned with name */}
+            <h3 className="font-semibold text-white text-base leading-tight">{goal.name}</h3>
+          </div>
+          {goal.type === 'active' && (
+            <div className="flex items-center gap-2 mt-0.5">
+              <p className="text-sm text-white/60">
+                {goal.currentCount} / {goal.target} {goal.unit}
+                {goal.frequency === 'weekly' && <span className="ml-1 text-white/40"></span>}
+              </p>
+              {goal.frequency === 'weekly' && (() => {
+                const weekStart = parseISO(goal.currentPeriodKey)
+                const logged = new Set(goal.activeDaysInPeriod ?? [])
+                return (
+                  <div className="flex gap-1">
+                    {Array.from({ length: 7 }, (_, i) => {
+                      const dk = dayKey(addDays(weekStart, i))
+                      return (
+                        <div key={i} className={`w-2 h-3 rounded-sm ${logged.has(dk) ? 'bg-white/50' : 'bg-white/10'}`} />
+                      )
+                    })}
+                  </div>
+                )
+              })()}
+            </div>
+          )}
+
+          <div className="mt-1.5 flex items-center gap-2">
+            <StatusPill status={status} />
             {goal.type === 'active' && (
-              <div className="flex-shrink-0 relative" style={{ width: 36, height: 36 }}>
-                <ProgressRing current={goal.currentCount} target={goal.target} size={36} strokeWidth={3} />
-                <span className="absolute inset-0 flex items-center justify-center text-[9px] font-bold text-white">
+              <div className="relative flex-shrink-0" style={{ width: 36, height: 36 }}>
+                <ProgressRing current={goal.currentCount} target={goal.target} size={36} strokeWidth={2.5} />
+                <span className="absolute inset-0 flex items-center justify-center text-[8px] font-bold text-white">
                   {Math.round(goal.currentCount >= goal.target ? 100 : (goal.currentCount / goal.target) * 100)}%
                 </span>
               </div>
             )}
-            <h3 className="font-semibold text-white text-base leading-tight">{goal.name}</h3>
-          </div>
-          {goal.type === 'active' && (
-            <p className="text-sm text-white/60 mt-0.5">
-              {goal.currentCount} / {goal.target} {goal.unit}
-              {goal.frequency === 'weekly' && <span className="ml-1 text-white/40">(weekly)</span>}
-            </p>
-          )}
-
-          {goal.type === 'active' && goal.frequency === 'weekly' && (() => {
-            const DAY_LABELS = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
-            const weekStart = parseISO(goal.currentPeriodKey)
-            const logged = new Set(goal.activeDaysInPeriod ?? [])
-            return (
-              <div className="flex gap-1 mt-1">
-                {DAY_LABELS.map((label, i) => {
-                  const dk = dayKey(addDays(weekStart, i))
-                  const filled = logged.has(dk)
-                  return (
-                    <div key={i} className="flex flex-col items-center gap-0.5">
-                      <div className={`w-4 h-4 rounded-sm ${filled ? 'bg-accent' : 'bg-white/10'}`} />
-                      <span className="text-[9px] text-white/30">{label}</span>
-                    </div>
-                  )
-                })}
-              </div>
-            )
-          })()}
-
-          <div className="mt-1.5 flex items-center gap-2">
-            <StatusPill status={status} />
           </div>
         </div>
 
-        {/* Right: actions */}
-        <div className="flex flex-col items-end gap-2 flex-shrink-0">
-          <div className="flex items-center gap-1">
-            {goal.details && (
-              <button
-                onClick={() => setShowDetails((v) => !v)}
-                className="p-1.5 rounded-lg text-white/40 hover:text-white/80 hover:bg-white/10 transition-colors"
-                aria-label="Show details"
-              >
-                <Info size={14} />
-              </button>
-            )}
-            <button
-              onClick={() => onHistory(goal)}
-              className="p-1.5 rounded-lg text-white/40 hover:text-white/80 hover:bg-white/10 transition-colors"
-              aria-label="View history"
-            >
-              <History size={14} />
-            </button>
-            <button
-              onClick={() => onEdit(goal)}
-              className="p-1.5 rounded-lg text-white/40 hover:text-white/80 hover:bg-white/10 transition-colors"
-              aria-label="Edit goal"
-            >
-              <Pencil size={14} />
-            </button>
-            <button
-              onClick={() => setConfirmDelete(true)}
-              className="p-1.5 rounded-lg text-white/40 hover:text-danger hover:bg-danger/10 transition-colors"
-              aria-label="Delete goal"
-            >
-              <Trash2 size={14} />
-            </button>
-          </div>
-
+        {/* Right: update button */}
+        <div className="flex-shrink-0 flex flex-col justify-end items-end gap-2">
           <button
             onClick={() => onUpdate(goal)}
-            className={`flex items-center gap-1 text-xs font-semibold border px-3 py-1.5 rounded-lg transition-colors hover:bg-white/10 ${colors.text} ${colors.border}`}
+            className="flex items-center gap-1 text-xs font-semibold border border-white/40 text-white/70 px-3 py-1.5 rounded-lg transition-colors hover:bg-white/10 hover:text-white hover:border-white/70"
           >
-            Update <ChevronRight size={13} />
+            Update 
           </button>
         </div>
       </div>
