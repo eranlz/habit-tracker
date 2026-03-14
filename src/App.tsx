@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { Plus, MoreHorizontal } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useGoalStore } from './store/useGoalStore'
@@ -10,6 +10,7 @@ import { UpdateModal } from './components/UpdateModal'
 import { AddGoalForm } from './components/AddGoalForm'
 import { EditGoalForm } from './components/EditGoalForm'
 import { LoginDialog } from './components/LoginDialog'
+import { AccessGate, useAccessGranted } from './components/AccessGate'
 import { HelpCard } from './components/HelpCard'
 import { HistoryModal } from './components/HistoryModal'
 import { MenuSheet } from './components/MenuSheet'
@@ -30,22 +31,10 @@ export default function App() {
 
   const [modalMode, setModalMode] = useState<ModalMode>('none')
   const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null)
+  const [accessGranted, setAccessGranted] = useState(useAccessGranted)
+  const onGranted = useCallback(() => setAccessGranted(true), [])
 
-  // Token gate (outermost layer — checked after hooks to satisfy Rules of Hooks)
-  const secret = import.meta.env.VITE_AUTH_TOKEN as string | undefined
-  if (!secret) return null
-
-  const params = new URLSearchParams(window.location.search)
-  const urlToken = params.get('token')
-
-  if (urlToken === secret) {
-    localStorage.setItem('token-authed', '1')
-    params.delete('token')
-    const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '')
-    window.history.replaceState(null, '', newUrl)
-  } else if (!localStorage.getItem('token-authed')) {
-    return null
-  }
+  if (!accessGranted) return <AccessGate onGranted={onGranted} />
 
   if (!currentUserId) {
     return <LoginDialog />
