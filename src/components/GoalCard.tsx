@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Pencil, Trash2, ChevronRight, GripVertical, History, Info, MoreHorizontal } from 'lucide-react'
+import { Pencil, Trash2, GripVertical, History, Info, MoreHorizontal } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { parseISO } from 'date-fns'
 import type { Goal } from '../types'
