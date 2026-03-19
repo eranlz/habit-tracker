@@ -170,7 +170,7 @@ export const useGoalStore = create<GoalStore>()(
         return setUD(state, userId, {
           goals: ud.goals.map((g) => {
             if (g.id !== id || g.type !== 'passive') return g
-            return { ...g, isFailed: true }
+            return { ...g, isFailed: true, streak: 0 }
           }),
         })
       }),
